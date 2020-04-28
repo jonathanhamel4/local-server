@@ -1,0 +1,21 @@
+{
+  "name": "local-ftp",
+  "version": "1.0.0",
+  "description": "A server to read your local files",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "http": "0.0.1-security",
+    "mime-types": "^2.1.27",
+    "mustache": "^4.0.1",
+    "yargs": "^15.3.1"
+  },
+  "devDependencies": {
+    "eslint": "^6.8.0",
+    "eslint-config-google": "^0.14.0"
+  }
+}

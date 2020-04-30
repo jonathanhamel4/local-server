@@ -7,6 +7,7 @@ const directoryTemplate = `
         <meta charset="utf-8">
     </head>
     <body>
+        <h3>Folder: {{folder}}</h3>
         {{#files}}
         <p>
             {{#isDir}}
@@ -23,8 +24,8 @@ const directoryTemplate = `
 `;
 
 
-const getDirectoryListingMarkup = (files) => {
-  return Mustache.render(directoryTemplate, {files});
+const getDirectoryListingMarkup = (files, folder) => {
+  return Mustache.render(directoryTemplate, {files, folder});
 };
 
 module.exports = {getDirectoryListingMarkup};

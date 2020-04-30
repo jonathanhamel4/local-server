@@ -9,9 +9,10 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "http": "0.0.1-security",
+    "fastify": "^2.14.0",
     "mime-types": "^2.1.27",
     "mustache": "^4.0.1",
+    "util": "^0.12.2",
     "yargs": "^15.3.1"
   },
   "devDependencies": {

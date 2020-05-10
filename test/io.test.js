@@ -30,8 +30,14 @@ describe('IO', () => {
     const folders = await getDirectoryListing(localFolder, 'qwerty');
     expect(folders).to.be.ok;
 
-    sinon.assert.match(folders[0], {isDir: false, fileName: 'abcd', filePath: 'qwerty/abcd'});
-    sinon.assert.match(folders[1], {isDir: true, fileName: 'test', filePath: 'qwerty/test'});
+    sinon.assert.match(
+        folders[0],
+        {isDir: false, fileName: 'abcd', filePath: 'qwerty/abcd'},
+    );
+    sinon.assert.match(
+        folders[1],
+        {isDir: true, fileName: 'test', filePath: 'qwerty/test'},
+    );
   });
 
   it('should empty get directory listing', async () => {

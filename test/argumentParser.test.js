@@ -48,7 +48,9 @@ describe('Argument Parser', () => {
 
     parseArguments(`--folder ./non-existing.abcd`, failCb);
 
-    expect(failCb.calledWith(sandbox.match('The root folder does not exist'))).to.be.ok;
+    expect(
+        failCb.calledWith(sandbox.match('The root folder does not exist')),
+    ).to.be.ok;
     expect(failCb.calledWith(sandbox.match(folder))).to.be.ok;
   });
 
@@ -58,7 +60,9 @@ describe('Argument Parser', () => {
 
     parseArguments(`--folder ${folder}`, failCb);
 
-    expect(failCb.calledWith(sandbox.match('The root must be a folder'))).to.be.ok;
+    expect(
+        failCb.calledWith(sandbox.match('The root must be a folder')),
+    ).to.be.ok;
     expect(failCb.calledWith(sandbox.match(folder))).to.be.ok;
   });
 
@@ -66,7 +70,11 @@ describe('Argument Parser', () => {
     const failCb = sandbox.spy();
     parseArguments(`--port abcde`, failCb);
 
-    expect(failCb.calledWith(sandbox.match('The port number must be a base-10 number'))).to.be.ok;
+    expect(
+        failCb.calledWith(
+            sandbox.match('The port number must be a base-10 number'),
+        ),
+    ).to.be.ok;
   });
 
   it('should accept port if port is a number', () => {
@@ -79,7 +87,11 @@ describe('Argument Parser', () => {
     const failCb = sandbox.spy();
     parseArguments(`--port 1023`, failCb);
 
-    expect(failCb.calledWith(sandbox.match('The port number must be greater than 1024'))).to.be.ok;
+    expect(
+        failCb.calledWith(
+            sandbox.match('The port number must be greater than 1024'),
+        ),
+    ).to.be.ok;
   });
 
   it('should set default port if port is not provided', () => {

@@ -39,9 +39,17 @@ const parseArguments = (content, failCb) => {
         return rootFolder;
       })
       .coerce('port', (port) => {
-        if (isNaN(port)) throw new Error(`The port number must be a base-10 number. Passed: ${port}`);
+        if (isNaN(port)) {
+          throw new Error(
+              `The port number must be a base-10 number. Passed: ${port}`,
+          );
+        }
 
-        if (port <= 1024) throw new Error(`The port number must be greater than 1024. Pased: ${port}`);
+        if (port <= 1024) {
+          throw new Error(
+              `The port number must be greater than 1024. Pased: ${port}`,
+          );
+        }
 
         return port;
       });

@@ -38,11 +38,23 @@ const sendFileContent = async (res, filePath, withMime, errorLog) => {
   }
 };
 
-const startServer = async (port, rootFolder, mime) => {
+const runFastify = async (fastify, port, rootFolder, mime) => {
+  try {
+    await fastify.listen(port);
+    fastify.log.info(`Serving ${rootFolder}`);
+    fastify.log.info(`Using mime: ${mime}`);
+  } catch (err) {
+    fastify.log.error(err);
+    process.exit(1);
+  }
+};
+
+const buildServer = (rootFolder, mime) => {
   const fastify = new Fastify({logger: true});
   fastify.get('*', async (req, res) => {
     const resource = req.params['*'];
 
+    console.log(resource);
     if (resource.includes('..')) {
       res.code(401).send(`The file path cannot contain '..': ${resource}`);
       return;
@@ -73,23 +85,14 @@ const startServer = async (port, rootFolder, mime) => {
       await sendFileContent(res, filePath, mime, fastify.log.error);
     }
   });
-
-  try {
-    await fastify.listen(port);
-    fastify.log.info(`Serving ${rootFolder}`);
-    fastify.log.info(`Using mime: ${mime}`);
-  } catch (err) {
-    fastify.log.error(err);
-    process.exit(1);
-  }
-
   return fastify;
 };
 
 
 if (require.main === module) {
   const {port, mime, folder} = parseArguments();
-  startServer(port, folder, mime);
+  const fastify = buildServer(folder, mime);
+  runFastify(fastify, port, folder, mime);
 }
 
-module.exports = {startServer};
+module.exports = {buildServer};

@@ -1,52 +1,60 @@
-// // const fs = require('fs');
-// // const path = require('path');
-// // const util = require('util');
+const sinon = require('sinon');
+// const mockFs = require('mock-fs');
+const expect = require('chai').expect;
+const path = require('path');
 
-// // const readdir = util.promisify(fs.readdir);
-// // const lstat = util.promisify(fs.lstat);
-// // const readFile = util.promisify(fs.readFile);
+const {buildServer} = require('../index');
 
-// // const getDirectoryListing = async (filePath, route) => {
-// //   const listing = [];
-// //   const files = await readdir(filePath);
+describe('e2e', () => {
+  afterEach(() => {
+    // mockFs.restore();
+  });
 
-// //   for (const file of files) {
-// //     const stat = await lstat(path.resolve(filePath, file));
-// //     listing.push({
-// //       isDir: stat.isDirectory(),
-// //       fileName: file,
-// //       filePath: path.join(route, file),
-// //     });
-// //   }
-// //   return listing;
-// // };
+  it('should return 200', async () => {
+    const fastify = buildServer(path.resolve('./test/fixtures'), true);
+    const response = await fastify.inject({
+      method: 'get',
+      url: '/',
+    });
+    expect(response.statusCode).to.equal(200);
+    expect(sinon.match(
+        response.payload,
+        `<h3>Folder: ${path.resolve('./test/fixtures')}</h3>`,
+    ));
 
-// // const getFileContent = async (filePath) => {
-// //   const data = await readFile(filePath);
-// //   return data.toString();
-// // };
+    expect(sinon.match(
+        response.payload,
+        `<a href="/fake-folder1">fake-folder1</a>`,
+    ));
 
-// // module.exports = {getDirectoryListing, getFileContent};
+    expect(sinon.match(
+        response.payload,
+        `<a href="/fake-file2">fake-file2</a>`,
+    ));
+  });
 
-// const path = require('path');
-// const expect = require('chai').expect;
-// const sinon = require('sinon');
+  it('should return file content', async () => {
+    const fastify = buildServer(
+        path.resolve('./test/fixtures'),
+        true,
+    );
+    const response = await fastify.inject({
+      method: 'get',
+      url: '/fake-file1',
+    });
+    expect(response.statusCode).to.equal(200);
+    expect(response.payload).to.equal('fake-file1');
+  });
 
-// const {getDirectoryListing, getFileContent} = require('../argumentParser');
-
-// const sandbox = sinon.createSandbox();
-
-// const createFiles() => {
-
-// };
-
-// describe('Argument Parser', () => {
-//   afterEach(() => {
-//     sandbox.restore();
-//   });
-
-//   it('should validate mime', () => {
-//     const {mime} = parseArguments(`--mime`);
-//     expect(mime).to.be.ok;
-//   });
-// });
+  it('should return 404 when file or folder is not found', async () => {
+    const fastify = buildServer(
+        path.resolve('./test/fixtures'),
+        true,
+    );
+    const response = await fastify.inject({
+      method: 'get',
+      url: '/rwar',
+    });
+    expect(response.statusCode).to.equal(404);
+  });
+});

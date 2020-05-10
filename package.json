@@ -4,7 +4,9 @@
   "description": "A server to read your local files",
   "main": "index.js",
   "scripts": {
-    "test": "mocha"
+    "start": "node index.js --port 3000 --folder . --mime",
+    "test": "mocha",
+    "test:coverage": "nyc --reporter=html mocha"
   },
   "author": "",
   "license": "ISC",
@@ -21,6 +23,7 @@
     "eslint-config-google": "^0.14.0",
     "mocha": "^7.1.2",
     "mock-fs": "^4.12.0",
+    "nyc": "^15.0.1",
     "sinon": "^9.0.2"
   }
 }

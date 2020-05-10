@@ -7,7 +7,7 @@ const directoryTemplate = `
         <meta charset="utf-8">
     </head>
     <body>
-        <h3>Folder: {{folder}}</h3>
+        <h3>Folder: {{{folder}}}</h3>
         {{#files}}
         <p>
             {{#isDir}}
@@ -16,7 +16,7 @@ const directoryTemplate = `
             {{^isDir}}
             📄
             {{/isDir}}
-            <a href="{{filePath}}">{{fileName}}</a>
+            <a href="{{{filePath}}}">{{fileName}}</a>
         </p>
         {{/files}}
     </body>

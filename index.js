@@ -1,41 +1,30 @@
 const fs = require('fs');
 const path = require('path');
 const mime = require('mime-types');
-const fastify = require('fastify')({logger: true});
+const Fastify = require('fastify');
 const util = require('util');
 
-const readdir = util.promisify(fs.readdir);
-const lstat = util.promisify(fs.lstat);
-const readFile = util.promisify(fs.readFile);
-
 const {getDirectoryListingMarkup} = require('./mustache');
-const {argv, ROOT_FOLDER} = require('./argumentParser');
+const {parseArguments} = require('./argumentParser');
+const {getDirectoryListing, getFileContent} = require('./io');
 
-const sendDirectoryListing = async (res, filePath, route) => {
+const lstat = util.promisify(fs.lstat);
+const exists = util.promisify(fs.exists);
+
+const sendDirectoryListing = async (res, filePath, route, errorLog) => {
   try {
-    const listing = [];
-    const files = await readdir(filePath);
-
-    for (const file of files) {
-      const stat = await lstat(path.resolve(filePath, file));
-      listing.push({
-        isDir: stat.isDirectory(),
-        fileName: file,
-        filePath: path.join(route, file),
-      });
-    }
-
+    const listing = await getDirectoryListing(filePath, route);
     const content = getDirectoryListingMarkup(listing, filePath);
     res.headers({'Content-Type': 'text/html'}).send(content);
   } catch (err) {
-    fastify.log.error(err);
+    errorLog(err);
     res.code(500).send();
   }
 };
 
-const sendFileContent = async (res, filePath, withMime) => {
+const sendFileContent = async (res, filePath, withMime, errorLog) => {
   try {
-    const data = await readFile(filePath);
+    const data = await getFileContent(filePath);
     const headers = {
       'Content-Type': withMime &&
         mime.contentType(path.extname(filePath)) ||
@@ -44,12 +33,13 @@ const sendFileContent = async (res, filePath, withMime) => {
 
     res.headers(headers).send(data.toString());
   } catch (err) {
-    fastify.log.error(err);
+    errorLog(err);
     res.code(500).send();
   }
 };
 
-const startServer = async () => {
+const startServer = async (port, rootFolder, mime) => {
+  const fastify = new Fastify({logger: true});
   fastify.get('*', async (req, res) => {
     const resource = req.params['*'];
 
@@ -59,43 +49,47 @@ const startServer = async () => {
     }
 
     const filePath = path.resolve(
-        ROOT_FOLDER,
+        rootFolder,
         resource.replace(/^\//, ''),
     );
 
-    if (!fs.existsSync(filePath)) {
+    const fileExists = await exists(filePath);
+    if (!fileExists) {
       res.code(404)
           .send(`Could not find the following file or directory: ${resource}`);
       return;
     }
 
-    if (!filePath.startsWith(ROOT_FOLDER)) {
+    if (!filePath.startsWith(rootFolder)) {
       res.code(401)
           .send(`Resolved path is outside of defined root folder: ${filePath}`);
       return;
     }
 
-    const stat = fs.lstatSync(filePath);
+    const stat = await lstat(filePath);
     if (stat.isDirectory()) {
-      await sendDirectoryListing(res, filePath, resource);
+      await sendDirectoryListing(res, filePath, resource, fastify.log.error);
     } else {
-      await sendFileContent(res, filePath, argv.mime);
+      await sendFileContent(res, filePath, mime, fastify.log.error);
     }
   });
 
   try {
-    await fastify.listen(argv.port);
-    fastify.log.info(`Serving ${ROOT_FOLDER}`);
-    fastify.log.info(`Using mime: ${argv.mime}`);
+    await fastify.listen(port);
+    fastify.log.info(`Serving ${rootFolder}`);
+    fastify.log.info(`Using mime: ${mime}`);
   } catch (err) {
     fastify.log.error(err);
     process.exit(1);
   }
+
+  return fastify;
 };
 
 
 if (require.main === module) {
-  startServer();
+  const {port, mime, folder} = parseArguments();
+  startServer(port, folder, mime);
 }
 
-
+module.exports = {startServer};

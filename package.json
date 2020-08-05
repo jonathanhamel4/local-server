@@ -11,7 +11,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "fastify": "^2.14.0",
+    "fastify": "^2.15.1",
     "mime-types": "^2.1.27",
     "mustache": "^4.0.1",
     "util": "^0.12.2",
